@@ -3,159 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIM Details Finder</title>
+    <title>TF AI Chatbot</title>
     <style>
+        /* 📌 بنیادی اسٹائلز */
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(45deg, #ff5722, #673ab7);
-            color: white;
-            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
             margin: 0;
             padding: 0;
-        }
-
-        .dialog {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .dialog-content {
-            background: white;
-            color: black;
+        /* 💎 Chatbox Glass Effect */
+        #chat-box {
+            width: 400px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            width: 320px;
-            border-radius: 10px;
-            text-align: center;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        input {
-            width: 90%;
-            padding: 10px;
+        /* ✨ Glow Effect on Chatbox */
+        @keyframes chatGlow {
+            0% { box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 10px 30px rgba(0, 123, 255, 0.5); }
+            100% { box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
+        }
+        #chat-box.active {
+            animation: chatGlow 3s infinite;
+        }
+
+        /* 📩 صارف اور بوٹ کے پیغامات کے اسٹائلز */
+        #chat-box p {
             margin: 10px 0;
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 75%;
             font-size: 16px;
+            animation: slideIn 0.5s ease-in-out;
         }
 
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #00bcd4;
-            border: none;
+        #chat-box p strong {
+            font-weight: bold;
+        }
+
+        /* 🙋‍♂️ User Messages */
+        #chat-box p.user-message {
+            background: #007bff;
             color: white;
-            cursor: pointer;
-            border-radius: 5px;
+            align-self: flex-end;
+            animation: userSlide 0.5s ease-in-out;
+        }
+
+        @keyframes userSlide {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 🤖 Bot Messages */
+        #chat-box p.bot-message {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            align-self: flex-start;
+            animation: botSlide 0.5s ease-in-out;
+        }
+
+        @keyframes botSlide {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 🎤 Input Box & Buttons */
+        #user-input {
+            width: 70%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             margin-top: 10px;
         }
 
-        .voice-btn {
-            background-color: #ff9800;
-        }
-
-        .close-btn {
-            background-color: red;
-        }
-
-        .whatsapp-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background-color: #25d366;
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff6f61, #ffcc00);
             color: white;
-            text-decoration: none;
-            font-size: 18px;
-            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        /* 🔥 Button Glow Animation */
+        @keyframes buttonGlow {
+            0% { box-shadow: 0 0 10px rgba(255, 108, 108, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 108, 108, 1); }
+            100% { box-shadow: 0 0 10px rgba(255, 108, 108, 0.5); }
+        }
+
+        button.glow {
+            animation: buttonGlow 1.5s infinite;
         }
     </style>
 </head>
-<body onload="openDialog()">
-
-    <!-- Dialog Box -->
-    <div id="simDialog" class="dialog">
-        <div class="dialog-content">
-            <h2>Enter Your Mobile Number</h2>
-            <input type="text" id="phoneNumber" placeholder="923xxxxxxxxx">
-            <button onclick="fetchSimDetails()">Search</button>
-            <button class="voice-btn" onclick="startVoiceRecognition()">🎙 Speak</button>
-        </div>
+<body>
+    <div id="chat-box">
+        <p class="bot-message"><strong>TF AI:</strong> Hello! How can I assist you today?</p>
     </div>
-
-    <!-- SIM Details Dialog -->
-    <div id="simDetailsDialog" class="dialog" style="display: none;">
-        <div class="dialog-content">
-            <h2>SIM Details</h2>
-            <p id="simDetails">Loading...</p>
-            <button onclick="speakDetails()">🔊 Listen</button>
-            <button class="close-btn" onclick="closeDialog()">Close</button>
-        </div>
-    </div>
-
-    <!-- WhatsApp Contact Button -->
-    <a href="https://wa.me/923321709972" class="whatsapp-btn" target="_blank">Contact on WhatsApp</a>
+    <input type="text" id="user-input" placeholder="Type your message...">
+    <button class="glow" onclick="sendTextMessage()">Send</button>
+    <button class="glow" onclick="startVoiceInput()">🎤 Speak</button>
 
     <script>
-        function openDialog() {
-            document.getElementById("simDialog").style.display = "flex";
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
         }
 
-        function closeDialog() {
-            document.getElementById("simDetailsDialog").style.display = "none";
-        }
-
-        function fetchSimDetails() {
-            let number = document.getElementById("phoneNumber").value;
-            if (!number.match(/^923\d{9}$/)) {
-                alert("Please enter a valid number in 923xxxxxxxxx format.");
-                return;
-            }
-
-            let apiUrl = `https://fam-official.serv00.net/sim/api.php?num=${number}`;
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    let details = `
-                        Name: ${data.name || "N/A"}<br>
-                        CNIC: ${data.cnic || "N/A"}<br>
-                        Address: ${data.address || "N/A"}
-                    `;
-                    document.getElementById("simDetails").innerHTML = details;
-                    document.getElementById("simDialog").style.display = "none";
-                    document.getElementById("simDetailsDialog").style.display = "flex";
-                })
-                .catch(error => {
-                    document.getElementById("simDetails").innerHTML = "Error fetching details!";
-                });
-        }
-
-        function speakDetails() {
-            let text = document.getElementById("simDetails").innerText;
-            let speech = new SpeechSynthesisUtterance(text);
-            speech.lang = "en-US";
-            window.speechSynthesis.speak(speech);
-        }
-
-        function startVoiceRecognition() {
-            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = "en-US";
+        function startVoiceInput() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.onresult = (event) => {
+                const voiceInput = event.results[0][0].transcript;
+                userInput.value = voiceInput;
+                sendTextMessage();
+            };
             recognition.start();
+        }
 
-            recognition.onresult = function(event) {
-                let spokenText = event.results[0][0].transcript.replace(/\D/g, '');
-                document.getElementById("phoneNumber").value = "923" + spokenText.substring(spokenText.length - 9);
-            };
+        function sendTextMessage() {
+            const userMessage = userInput.value;
+            if (!userMessage) return;
 
-            recognition.onerror = function() {
-                alert("Voice recognition error. Try again.");
-            };
+            // ✨ صارف کا پیغام شامل کریں
+            const userMessageElement = document.createElement('p');
+            userMessageElement.classList.add('user-message');
+            userMessageElement.innerHTML = `<strong>You:</strong> ${userMessage}`;
+            chatBox.appendChild(userMessageElement);
+            userInput.value = '';
+
+            // 📌 OpenAI API کال کرنے کی جگہ (ڈیفالٹ جواب)
+            setTimeout(() => {
+                const botMessageElement = document.createElement('p');
+                botMessageElement.classList.add('bot-message');
+                botMessageElement.innerHTML = `<strong>TF AI:</strong> Hmm... I'm thinking! 🤔`;
+                chatBox.appendChild(botMessageElement);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                // 🔊 بوٹ کا جواب آواز میں پڑھیں
+                speak("Hmm... I'm thinking!");
+            }, 1000);
+
+            chatBox.classList.add('active'); // 🌟 اینیمیشن ایکٹیو کریں
         }
     </script>
-
 </body>
 </html>
