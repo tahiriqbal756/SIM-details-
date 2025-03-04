@@ -14,36 +14,23 @@
             padding: 0;
         }
 
-        .container {
-            margin-top: 50px;
-        }
-
-        .login-btn {
-            padding: 15px 25px;
-            font-size: 18px;
-            background-color: #00bcd4;
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
         .dialog {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .dialog-content {
             background: white;
             color: black;
             padding: 20px;
-            width: 300px;
-            margin: 100px auto;
+            width: 320px;
             border-radius: 10px;
             text-align: center;
         }
@@ -52,57 +39,60 @@
             width: 90%;
             padding: 10px;
             margin: 10px 0;
+            font-size: 16px;
         }
 
         button {
-            padding: 10px;
-            margin-top: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #00bcd4;
+            border: none;
+            color: white;
             cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .voice-btn {
+            background-color: #ff9800;
         }
 
         .close-btn {
             background-color: red;
-            color: white;
         }
 
         .whatsapp-btn {
-            display: inline-block;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             padding: 15px 20px;
             background-color: #25d366;
             color: white;
             text-decoration: none;
             font-size: 18px;
             border-radius: 5px;
-            margin-top: 20px;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
         }
     </style>
 </head>
-<body>
+<body onload="openDialog()">
 
-    <div class="container">
-        <h1>SIM Details Finder</h1>
-        <button class="login-btn" onclick="openLoginDialog()">Login</button>
-    </div>
-
-    <!-- Login Dialog -->
-    <div id="loginDialog" class="dialog">
+    <!-- Dialog Box -->
+    <div id="simDialog" class="dialog">
         <div class="dialog-content">
-            <h2>Enter Mobile Number</h2>
-            <input type="text" id="phoneNumber" placeholder="Enter Number (923xxxxxxxxx)">
+            <h2>Enter Your Mobile Number</h2>
+            <input type="text" id="phoneNumber" placeholder="923xxxxxxxxx">
             <button onclick="fetchSimDetails()">Search</button>
-            <button class="close-btn" onclick="closeDialog('loginDialog')">Close</button>
+            <button class="voice-btn" onclick="startVoiceRecognition()">🎙 Speak</button>
         </div>
     </div>
 
     <!-- SIM Details Dialog -->
-    <div id="simDetailsDialog" class="dialog">
+    <div id="simDetailsDialog" class="dialog" style="display: none;">
         <div class="dialog-content">
             <h2>SIM Details</h2>
             <p id="simDetails">Loading...</p>
-            <button class="close-btn" onclick="closeDialog('simDetailsDialog')">Close</button>
+            <button onclick="speakDetails()">🔊 Listen</button>
+            <button class="close-btn" onclick="closeDialog()">Close</button>
         </div>
     </div>
 
@@ -110,12 +100,12 @@
     <a href="https://wa.me/923321709972" class="whatsapp-btn" target="_blank">Contact on WhatsApp</a>
 
     <script>
-        function openLoginDialog() {
-            document.getElementById("loginDialog").style.display = "block";
+        function openDialog() {
+            document.getElementById("simDialog").style.display = "flex";
         }
 
-        function closeDialog(dialogId) {
-            document.getElementById(dialogId).style.display = "none";
+        function closeDialog() {
+            document.getElementById("simDetailsDialog").style.display = "none";
         }
 
         function fetchSimDetails() {
@@ -130,17 +120,40 @@
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("simDetails").innerHTML = `
-                        <strong>Name:</strong> ${data.name || "N/A"}<br>
-                        <strong>CNIC:</strong> ${data.cnic || "N/A"}<br>
-                        <strong>Address:</strong> ${data.address || "N/A"}
+                    let details = `
+                        Name: ${data.name || "N/A"}<br>
+                        CNIC: ${data.cnic || "N/A"}<br>
+                        Address: ${data.address || "N/A"}
                     `;
-                    closeDialog("loginDialog");
-                    document.getElementById("simDetailsDialog").style.display = "block";
+                    document.getElementById("simDetails").innerHTML = details;
+                    document.getElementById("simDialog").style.display = "none";
+                    document.getElementById("simDetailsDialog").style.display = "flex";
                 })
                 .catch(error => {
                     document.getElementById("simDetails").innerHTML = "Error fetching details!";
                 });
+        }
+
+        function speakDetails() {
+            let text = document.getElementById("simDetails").innerText;
+            let speech = new SpeechSynthesisUtterance(text);
+            speech.lang = "en-US";
+            window.speechSynthesis.speak(speech);
+        }
+
+        function startVoiceRecognition() {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                let spokenText = event.results[0][0].transcript.replace(/\D/g, '');
+                document.getElementById("phoneNumber").value = "923" + spokenText.substring(spokenText.length - 9);
+            };
+
+            recognition.onerror = function() {
+                alert("Voice recognition error. Try again.");
+            };
         }
     </script>
 
