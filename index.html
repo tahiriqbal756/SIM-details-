@@ -110,13 +110,13 @@
 
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en';
+            utterance.lang = 'ur'; 
             window.speechSynthesis.speak(utterance);
         }
 
         function startVoiceInput() {
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
+            recognition.lang = 'ur';
             recognition.onresult = (event) => {
                 const voiceInput = event.results[0][0].transcript;
                 userInput.value = voiceInput;
@@ -135,15 +135,27 @@
             chatBox.appendChild(userMessageElement);
             userInput.value = '';
 
-            // Dummy bot response (You can replace with AI API)
-            const botResponses = [
-                "I'm here to assist you!",
-                "Tell me more!",
-                "That sounds interesting!",
-                "Let's talk about it!",
-                "How can I assist you today?"
-            ];
-            const botMessage = botResponses[Math.floor(Math.random() * botResponses.length)];
+            let botMessage = "میں آپ کی بات سمجھ نہیں پایا۔";
+
+            // اگر یوزر اونر کا پوچھے
+            if (
+                userMessage.toLowerCase().includes('owner') ||
+                userMessage.toLowerCase().includes('مالک') ||
+                userMessage.toLowerCase().includes('tumhara malik') ||
+                userMessage.toLowerCase().includes('تمہارا مالک کون ہے؟')
+            ) {
+                botMessage = "میرا اونر طاہر اقبال ہے۔ اس نے مجھے لرن پر ٹرین کیا ہے۔ یہ اس کا نمبر ہے: 923321709972";
+            } else {
+                // Dummy bot response
+                const botResponses = [
+                    "میں مدد کے لیے حاضر ہوں!",
+                    "مزید بتائیں!",
+                    "یہ دلچسپ لگتا ہے!",
+                    "آئیے اس بارے میں بات کریں!",
+                    "آج میں آپ کی کیا مدد کر سکتا ہوں؟"
+                ];
+                botMessage = botResponses[Math.floor(Math.random() * botResponses.length)];
+            }
 
             const botMessageElement = document.createElement('p');
             botMessageElement.classList.add('bot-message');
