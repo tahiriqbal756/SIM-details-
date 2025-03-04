@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TF AI Chatbot</title>
     <style>
-        /* 📌 بنیادی اسٹائلز */
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #ff9a9e, #fad0c4);
@@ -15,87 +14,55 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
+            flex-direction: column;
         }
 
-        /* 💎 Chatbox Glass Effect */
         #chat-box {
             width: 400px;
             height: 500px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            position: relative;
             animation: fadeIn 1s ease-in-out;
         }
 
-        /* ✨ Glow Effect on Chatbox */
-        @keyframes chatGlow {
-            0% { box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
-            50% { box-shadow: 0 10px 30px rgba(0, 123, 255, 0.5); }
-            100% { box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
-        }
-        #chat-box.active {
-            animation: chatGlow 3s infinite;
-        }
-
-        /* 📩 صارف اور بوٹ کے پیغامات کے اسٹائلز */
         #chat-box p {
             margin: 10px 0;
-            padding: 12px;
-            border-radius: 12px;
-            max-width: 75%;
-            font-size: 16px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
             animation: slideIn 0.5s ease-in-out;
         }
 
-        #chat-box p strong {
-            font-weight: bold;
-        }
-
-        /* 🙋‍♂️ User Messages */
-        #chat-box p.user-message {
+        .user-message {
             background: #007bff;
             color: white;
             align-self: flex-end;
-            animation: userSlide 0.5s ease-in-out;
         }
 
-        @keyframes userSlide {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* 🤖 Bot Messages */
-        #chat-box p.bot-message {
-            background: rgba(255, 255, 255, 0.8);
+        .bot-message {
+            background: #f1f1f1;
             color: #333;
             align-self: flex-start;
-            animation: botSlide 0.5s ease-in-out;
         }
 
-        @keyframes botSlide {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* 🎤 Input Box & Buttons */
         #user-input {
-            width: 70%;
-            padding: 12px;
+            width: calc(100% - 120px);
+            padding: 10px;
             border: none;
             border-radius: 10px;
+            margin-top: 10px;
             font-size: 16px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-top: 10px;
         }
 
         button {
-            padding: 10px 18px;
+            padding: 10px 20px;
             border: none;
             border-radius: 10px;
             background: linear-gradient(135deg, #ff6f61, #ffcc00);
@@ -103,32 +70,39 @@
             font-size: 16px;
             cursor: pointer;
             margin-left: 10px;
-            transition: transform 0.2s;
+            animation: pulse 2s infinite;
         }
 
         button:hover {
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #ffcc00, #ff6f61);
         }
 
-        /* 🔥 Button Glow Animation */
-        @keyframes buttonGlow {
-            0% { box-shadow: 0 0 10px rgba(255, 108, 108, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 108, 108, 1); }
-            100% { box-shadow: 0 0 10px rgba(255, 108, 108, 0.5); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        button.glow {
-            animation: buttonGlow 1.5s infinite;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
+
     <div id="chat-box">
-        <p class="bot-message"><strong>TF AI:</strong> Hello! How can I assist you today?</p>
+        <p class="bot-message"><strong>TF AI:</strong> Hello! How can I help you?</p>
     </div>
+    
     <input type="text" id="user-input" placeholder="Type your message...">
-    <button class="glow" onclick="sendTextMessage()">Send</button>
-    <button class="glow" onclick="startVoiceInput()">🎤 Speak</button>
+    <button onclick="sendTextMessage()">Send</button>
+    <button onclick="startVoiceInput()">🎤 Speak</button>
 
     <script>
         const chatBox = document.getElementById('chat-box');
@@ -136,6 +110,7 @@
 
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en';
             window.speechSynthesis.speak(utterance);
         }
 
@@ -150,31 +125,34 @@
             recognition.start();
         }
 
-        function sendTextMessage() {
+        async function sendTextMessage() {
             const userMessage = userInput.value;
             if (!userMessage) return;
 
-            // ✨ صارف کا پیغام شامل کریں
             const userMessageElement = document.createElement('p');
             userMessageElement.classList.add('user-message');
             userMessageElement.innerHTML = `<strong>You:</strong> ${userMessage}`;
             chatBox.appendChild(userMessageElement);
             userInput.value = '';
 
-            // 📌 OpenAI API کال کرنے کی جگہ (ڈیفالٹ جواب)
-            setTimeout(() => {
-                const botMessageElement = document.createElement('p');
-                botMessageElement.classList.add('bot-message');
-                botMessageElement.innerHTML = `<strong>TF AI:</strong> Hmm... I'm thinking! 🤔`;
-                chatBox.appendChild(botMessageElement);
-                chatBox.scrollTop = chatBox.scrollHeight;
-                
-                // 🔊 بوٹ کا جواب آواز میں پڑھیں
-                speak("Hmm... I'm thinking!");
-            }, 1000);
+            // Dummy bot response (You can replace with AI API)
+            const botResponses = [
+                "I'm here to assist you!",
+                "Tell me more!",
+                "That sounds interesting!",
+                "Let's talk about it!",
+                "How can I assist you today?"
+            ];
+            const botMessage = botResponses[Math.floor(Math.random() * botResponses.length)];
 
-            chatBox.classList.add('active'); // 🌟 اینیمیشن ایکٹیو کریں
+            const botMessageElement = document.createElement('p');
+            botMessageElement.classList.add('bot-message');
+            botMessageElement.innerHTML = `<strong>TF AI:</strong> ${botMessage}`;
+            chatBox.appendChild(botMessageElement);
+
+            speak(botMessage);
         }
     </script>
+
 </body>
 </html>
