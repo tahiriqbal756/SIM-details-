@@ -27,7 +27,6 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            position: relative;
             animation: fadeIn 1s ease-in-out;
         }
 
@@ -108,6 +107,9 @@
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
 
+        // OpenAI API Key
+        const apiKey = "YOUR_OPENAI_API_KEY"; 
+
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'ur'; 
@@ -146,15 +148,26 @@
             ) {
                 botMessage = "میرا اونر طاہر اقبال ہے۔ اس نے مجھے لرن پر ٹرین کیا ہے۔ یہ اس کا نمبر ہے: 923321709972";
             } else {
-                // Dummy bot response
-                const botResponses = [
-                    "میں مدد کے لیے حاضر ہوں!",
-                    "مزید بتائیں!",
-                    "یہ دلچسپ لگتا ہے!",
-                    "آئیے اس بارے میں بات کریں!",
-                    "آج میں آپ کی کیا مدد کر سکتا ہوں؟"
-                ];
-                botMessage = botResponses[Math.floor(Math.random() * botResponses.length)];
+                // OpenAI سے جواب لینا
+                try {
+                    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-4",
+                            messages: [{ role: "user", content: userMessage }],
+                            max_tokens: 200
+                        })
+                    });
+
+                    const data = await response.json();
+                    botMessage = data.choices[0].message.content.trim();
+                } catch (error) {
+                    botMessage = "معذرت، میں اس وقت جواب دینے سے قاصر ہوں!";
+                }
             }
 
             const botMessageElement = document.createElement('p');
